@@ -12,14 +12,35 @@ export default async function handler(req, res) {
     if (!query) return sendJson(res, 400, { error: 'Masukkan kata kunci pencarian.' });
     if (!hasPexels && !hasPixabay) return sendJson(res, 503, { error: 'API key belum dikonfigurasi. Tambahkan environment variables di Vercel.' });
 
-    const [pexels, pixabay] = await Promise.all([
+    const results = await Promise.allSettled([
       searchPexels({ query, type, page, orientation, perPage }),
       searchPixabay({ query, type, page, orientation, perPage, order })
     ]);
+
+    const pexels = results[0].status === 'fulfilled'
+      ? results[0].value
+      : { items: [], total: 0, configured: hasPexels, error: results[0].reason?.message || 'Pexels error' };
+    const pixabay = results[1].status === 'fulfilled'
+      ? results[1].value
+      : { items: [], total: 0, configured: hasPixabay, error: results[1].reason?.message || 'Pixabay error' };
+
     let items = [...pexels.items, ...pixabay.items];
     if (order === 'latest') items = items.reverse();
     res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=86400');
-    return sendJson(res, 200, { query, page, perPage, items, sources: { pexels: { configured: pexels.configured, total: pexels.total }, pixabay: { configured: pixabay.configured, total: pixabay.total } } });
+    const sourceErrors = {};
+    if (pexels.error) sourceErrors.pexels = pexels.error;
+    if (pixabay.error) sourceErrors.pixabay = pixabay.error;
+    return sendJson(res, 200, {
+      query,
+      page,
+      perPage,
+      items,
+      sources: {
+        pexels: { configured: pexels.configured, total: pexels.total, error: pexels.error || null },
+        pixabay: { configured: pixabay.configured, total: pixabay.total, error: pixabay.error || null }
+      },
+      sourceErrors
+    });
   } catch (error) {
     console.error(error);
     const status = error?.status === 429 ? 429 : 500;

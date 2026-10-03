@@ -208,6 +208,9 @@ async function search({ append = false } = {}) {
     els.resultKicker.textContent = `${state.items.length} assets loaded`;
     els.resultMeta.textContent = status.join('  ·  ');
     renderCards();
+
+    const sourceErrors = Object.values(data.sourceErrors || {});
+    if (sourceErrors.length) showNotice(sourceErrors.join('  |  '));
     els.loadMoreWrap.classList.toggle('hidden', !state.hasMore);
     if (!state.items.length) showNotice('Tidak ada hasil. Coba keyword yang lebih umum seperti “coffee”, “nature”, atau “travel”.');
     if (!append) $('#workspace').scrollIntoView({ behavior: 'smooth', block: 'start' });

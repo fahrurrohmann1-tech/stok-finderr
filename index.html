@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Cari foto dan video stock dari Pexels dan Pixabay dalam satu tempat." />
+  <title>StockFinder — Photo & Video Search</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="noise"></div>
+  <div class="app-shell">
+    <header class="topbar">
+      <a class="brand" href="/" aria-label="StockFinder home">
+        <span class="brand-mark">S</span>
+        <span>StockFinder</span>
+      </a>
+      <div class="topbar-actions">
+        <span class="source-status" id="sourceStatus">Checking sources...</span>
+        <button class="icon-button" id="favoritesBtn" type="button" aria-label="Open favorites">
+          <span>♡</span><b id="favoriteCount">0</b>
+        </button>
+      </div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">ONE SEARCH • TWO STOCK LIBRARIES</span>
+          <h1>Temukan footage<br><em>yang tepat.</em></h1>
+          <p>Foto dan video dari Pexels + Pixabay, dikumpulkan dalam satu workspace untuk creator.</p>
+        </div>
+
+        <form class="search-box" id="searchForm">
+          <div class="search-icon">⌕</div>
+          <input id="searchInput" autocomplete="off" placeholder="Cari coffee, nature, travel, product..." />
+          <button type="submit" class="search-button">Search <span>↵</span></button>
+        </form>
+
+        <div class="quick-searches" id="quickSearches">
+          <span>Trending</span>
+          <button type="button" data-query="coffee">Coffee</button>
+          <button type="button" data-query="cinematic city">Cinematic city</button>
+          <button type="button" data-query="food">Food</button>
+          <button type="button" data-query="nature">Nature</button>
+          <button type="button" data-query="technology">Technology</button>
+        </div>
+      </section>
+
+      <section class="workspace" id="workspace">
+        <div class="toolbar">
+          <div class="segmented" role="tablist" aria-label="Media type">
+            <button class="active" data-type="all" type="button">All</button>
+            <button data-type="photo" type="button">Photos</button>
+            <button data-type="video" type="button">Videos</button>
+          </div>
+          <div class="toolbar-right">
+            <select id="orientationSelect" aria-label="Orientation">
+              <option value="all">All ratios</option>
+              <option value="landscape">Landscape</option>
+              <option value="portrait">Portrait</option>
+              <option value="square">Square</option>
+            </select>
+            <select id="orderSelect" aria-label="Sort order">
+              <option value="popular">Popular</option>
+              <option value="latest">Latest</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="result-heading">
+          <div>
+            <span class="result-kicker" id="resultKicker">Ready when you are</span>
+            <h2 id="resultTitle">Cari stock untuk proyekmu</h2>
+          </div>
+          <div class="result-meta" id="resultMeta"></div>
+        </div>
+
+        <div class="notice hidden" id="notice"></div>
+        <div class="results-grid" id="resultsGrid"></div>
+        <div class="load-more-wrap hidden" id="loadMoreWrap">
+          <button class="load-more" id="loadMoreBtn" type="button">Load more</button>
+        </div>
+
+        <section class="empty-state" id="emptyState">
+          <div class="empty-orb"><span>✦</span></div>
+          <h3>Mulai dengan satu kata.</h3>
+          <p>Cari apa pun yang kamu butuhkan untuk Reels, TikTok, Shorts, YouTube, atau desain.</p>
+          <div class="mini-hints"><span>9:16</span><span>16:9</span><span>4K</span><span>B-roll</span></div>
+        </section>
+      </section>
+    </main>
+
+    <footer>
+      <div>StockFinder · Personal creator tool</div>
+      <div class="attribution">
+        Results powered by <a href="https://www.pexels.com/" target="_blank" rel="noreferrer">Pexels</a> & <a href="https://pixabay.com/" target="_blank" rel="noreferrer">Pixabay</a>.
+      </div>
+    </footer>
+  </div>
+
+  <div class="modal hidden" id="previewModal" aria-hidden="true">
+    <div class="modal-backdrop" data-close-modal></div>
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal-close" type="button" data-close-modal aria-label="Close">×</button>
+      <div class="modal-media" id="modalMedia"></div>
+      <div class="modal-info">
+        <div class="modal-badge" id="modalProvider"></div>
+        <h2 id="modalTitle">Asset</h2>
+        <div class="modal-sub" id="modalCreator"></div>
+        <div class="detail-row" id="modalSpecs"></div>
+        <div class="license-box">
+          <span class="license-icon">✓</span>
+          <div><b id="modalLicense">License</b><small>Periksa ketentuan sumber sebelum penggunaan komersial.</small></div>
+        </div>
+        <div class="modal-actions">
+          <button class="download-button" id="modalDownload" type="button">↓ Download</button>
+          <a class="secondary-button" id="modalSource" href="#" target="_blank" rel="noreferrer">Open source ↗</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="/app.js" defer></script>
+</body>
+</html>

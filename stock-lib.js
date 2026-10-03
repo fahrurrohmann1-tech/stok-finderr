@@ -15,16 +15,33 @@ async function cached(key, producer) {
   return value;
 }
 
-async function fetchJson(url, options = {}) {
+async function fetchJson(url, options = {}, provider = 'Provider') {
   const response = await fetch(url, options);
   const text = await response.text();
-  let data = {};
-  try { data = text ? JSON.parse(text) : {}; } catch { throw new Error(`Provider returned non-JSON (${response.status}).`); }
+  const contentType = response.headers.get('content-type') || '';
+
+  // Pixabay returns plain-text bodies for API errors, while successful
+  // responses are JSON. Handle both formats so the real API error is visible.
+  let data = null;
+  if (contentType.includes('application/json')) {
+    try { data = text ? JSON.parse(text) : {}; } catch { data = null; }
+  } else {
+    try { data = text ? JSON.parse(text) : {}; } catch { data = null; }
+  }
+
   if (!response.ok) {
-    const error = new Error(typeof data?.error === 'string' ? data.error : `Provider request failed (${response.status}).`);
+    const message = typeof data?.error === 'string'
+      ? data.error
+      : (text || `${provider} request failed (${response.status}).`).trim();
+    const error = new Error(`${provider}: ${message}`);
     error.status = response.status;
     throw error;
   }
+
+  if (!data || typeof data !== 'object') {
+    throw new Error(`${provider}: respons tidak valid.`);
+  }
+
   return data;
 }
 
@@ -41,7 +58,7 @@ export async function searchPexels({ query, type, page, orientation, perPage }) 
   if (type === 'all' || type === 'video') tasks.push(['video', `https://api.pexels.com/v1/videos/search?${params}`]);
 
   const results = await Promise.all(tasks.map(async ([kind, url]) => {
-    const data = await cached(`pexels:${url}`, () => fetchJson(url, { headers: { Authorization: process.env.PEXELS_API_KEY } }));
+    const data = await cached(`pexels:${url}`, () => fetchJson(url, { headers: { Authorization: process.env.PEXELS_API_KEY } }, 'Pexels'));
     if (kind === 'photo') return {
       total: data.total_results || 0,
       items: (data.photos || []).map(photo => ({
@@ -77,7 +94,7 @@ export async function searchPixabay({ query, type, page, orientation, perPage, o
   if (type === 'all' || type === 'video') tasks.push(['video', `https://pixabay.com/api/videos/?${videoParams}`]);
 
   const results = await Promise.all(tasks.map(async ([kind, url]) => {
-    const data = await cached(`pixabay:${url}`, () => fetchJson(url));
+    const data = await cached(`pixabay:${url}`, () => fetchJson(url, {}, 'Pixabay'));
     if (kind === 'photo') return {
       total: data.totalHits || 0,
       items: (data.hits || []).map(hit => ({
